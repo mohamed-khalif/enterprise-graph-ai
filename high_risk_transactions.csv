@@ -1,4 +1,0 @@
-﻿order_id,customer_id,total_amount,order_status,payment_method,order_date,created_at
-ORD-2024-008,CUST-1007,15000,Cancelled,Credit Card,2024-01-22,2024-01-22 02:30:00
-ORD-2024-009,CUST-1008,25000,Processing,Wire Transfer,2024-01-23,2024-01-23 03:15:00
-ORD-2024-010,CUST-1009,500,Cancelled,Credit Card,2024-01-24,2024-01-24 23:45:00

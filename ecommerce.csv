@@ -1,6 +1,0 @@
-﻿order_id,customer_id,customer_name,product_name,category,quantity,unit_price,total_amount,order_date,city,state,order_status
-ORD-001,CUST-1001,John Smith,Wireless Headphones,Electronics,2,79.99,159.98,2024-01-15,New York,NY,Shipped
-ORD-002,CUST-1002,Sarah Johnson,Running Shoes,Footwear,1,129.99,129.99,2024-01-16,Los Angeles,CA,Delivered
-ORD-003,CUST-1003,Mike Chen,Coffee Maker,Kitchen,1,249.99,249.99,2024-01-17,Chicago,IL,Processing
-ORD-004,CUST-1001,John Smith,Laptop Stand,Office,3,39.99,119.97,2024-01-18,New York,NY,Shipped
-ORD-005,CUST-1004,Emma Wilson,Yoga Mat,Fitness,2,29.99,59.98,2024-01-19,Miami,FL,Delivered

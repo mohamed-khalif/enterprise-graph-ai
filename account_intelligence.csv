@@ -1,6 +1,0 @@
-﻿account_id,company_name,industry,company_size,annual_revenue,health_score,last_purchase_date,total_lifetime_value,decision_maker_engagement,contract_renewal_date,churn_risk_score,created_at
-ACC-001,TechCorp Solutions,Technology,500,50000000,7.8,2023-11-15,125000,High,2024-06-30,0.2,2024-01-01 09:00:00
-ACC-002,Finance Plus,Finance,1200,120000000,6.5,2023-08-20,450000,Medium,2024-08-15,0.4,2024-01-01 09:00:00
-ACC-003,HealthSystem Inc,Healthcare,800,75000000,8.9,2024-01-10,75000,High,2024-12-01,0.1,2024-01-01 09:00:00
-ACC-004,Manufacturing Co,Manufacturing,2000,200000000,5.2,2023-06-30,800000,Low,2024-03-31,0.7,2024-01-01 09:00:00
-ACC-005,StartupXYZ,Technology,50,5000000,9.1,2024-01-25,25000,High,2024-09-15,0.15,2024-01-01 09:00:00
