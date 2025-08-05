@@ -1,0 +1,1581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GraphMind AI - Intelligence Built for Business</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.26.0/cytoscape.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        /* Animated background grid */
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+            opacity: 0.6;
+        }
+
+        .particle:nth-child(1) { width: 4px; height: 4px; top: 10%; left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { width: 6px; height: 6px; top: 20%; left: 80%; animation-delay: 2s; }
+        .particle:nth-child(3) { width: 3px; height: 3px; top: 60%; left: 30%; animation-delay: 4s; }
+        .particle:nth-child(4) { width: 5px; height: 5px; top: 80%; left: 70%; animation-delay: 6s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(-30px) translateX(5px); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header with glassmorphism */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.3; }
+            50% { transform: translateX(-50%) scale(1.2); opacity: 0.1; }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: slideInFromTop 1s ease-out;
+        }
+
+        .header .subtitle {
+            font-size: 1.4rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            animation: slideInFromTop 1s ease-out 0.2s both;
+        }
+
+        .header .description {
+            font-size: 1.1rem;
+            opacity: 0.7;
+            max-width: 600px;
+            margin: 0 auto;
+            animation: slideInFromTop 1s ease-out 0.4s both;
+        }
+
+        @keyframes slideInFromTop {
+            0% {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Glassmorphism cards */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .glass-card:hover::before {
+            left: 100%;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 35px 60px rgba(0, 0, 0, 0.2);
+            border-color: rgba(102, 126, 234, 0.3);
+        }
+
+        /* Upload section styling */
+        .upload-section {
+            animation: slideInFromLeft 1s ease-out 0.6s both;
+        }
+
+        .upload-zone {
+            border: 3px dashed rgba(102, 126, 234, 0.5);
+            border-radius: 20px;
+            padding: 50px;
+            margin: 30px 0;
+            text-align: center;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            background: rgba(102, 126, 234, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-zone::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            transition: all 0.4s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .upload-zone:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .upload-zone:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.2);
+        }
+
+        .upload-zone.dragover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        /* Button styling */
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Data source tabs */
+        .data-source-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .data-source-tab {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .data-source-tab:hover {
+            background: rgba(102, 126, 234, 0.3);
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .data-source-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: #667eea;
+        }
+
+        /* Connection forms */
+        .connection-form {
+            display: none;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .connection-form.active {
+            display: grid;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .form-group input, .form-group textarea {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .form-group input::placeholder, .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Summary cards animation */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.8) 0%, rgba(118, 75, 162, 0.8) 100%);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            animation: slideInFromBottom 0.6s ease-out;
+        }
+
+        .summary-card:nth-child(2) { animation-delay: 0.1s; }
+        .summary-card:nth-child(3) { animation-delay: 0.2s; }
+        .summary-card:nth-child(4) { animation-delay: 0.3s; }
+
+        @keyframes slideInFromBottom {
+            0% {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(102, 126, 234, 0.3);
+        }
+
+        .card-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .card-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            color: white;
+        }
+
+        /* Tabs styling */
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            gap: 5px;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border-radius: 10px 10px 0 0;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+        }
+
+        .tab.active {
+            border-bottom-color: #667eea;
+            background: rgba(102, 126, 234, 0.3);
+            color: #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Table styling */
+        .predictions-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .predictions-table th,
+        .predictions-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .predictions-table th {
+            background: rgba(102, 126, 234, 0.2);
+            font-weight: 600;
+            color: white;
+        }
+
+        .predictions-table tr:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transition: background 0.3s ease;
+        }
+
+        /* Risk badges */
+        .risk-badge {
+            padding: 6px 15px;
+            border-radius: 25px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .risk-high {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .risk-medium {
+            background: linear-gradient(135deg, #ffa726, #ff9800);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 167, 38, 0.3);
+        }
+
+        .risk-low {
+            background: linear-gradient(135deg, #66bb6a, #4caf50);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 187, 106, 0.3);
+        }
+
+        /* Graph container */
+        .graph-container {
+            height: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(10px);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        /* Loading animation */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 30px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* File list styling */
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 20px;
+            margin: 10px 0;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .file-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+
+        .remove-file {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .remove-file:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        /* Status indicators */
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-ready {
+            background: rgba(102, 187, 106, 0.2);
+            color: #66bb6a;
+            border: 1px solid rgba(102, 187, 106, 0.3);
+        }
+
+        .status-processing {
+            background: rgba(255, 167, 38, 0.2);
+            color: #ffa726;
+            border: 1px solid rgba(255, 167, 38, 0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .data-source-tabs {
+                flex-direction: column;
+            }
+        }
+
+        /* Micro-interactions */
+        .btn, .data-source-tab, .tab {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn:hover, .data-source-tab:hover, .tab:hover {
+            z-index: 2;
+        }
+
+        /* Enterprise badge */
+        .enterprise-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            animation: slideInFromRight 1s ease-out 1s both;
+        }
+
+        @keyframes slideInFromRight {
+            0% {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideInFromLeft {
+            0% {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated background elements -->
+    <div class="background-grid"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+
+    <div class="container">
+        <div class="enterprise-badge">
+            🚀 Enterprise Ready
+        </div>
+
+        <div class="header">
+            <h1>GraphMind AI</h1>
+            <p class="subtitle">Intelligence built for business</p>
+            <p class="description">Transform your data into AI-powered insights with fraud detection, churn prediction, and relationship analysis — at scale.</p>
+        </div>
+
+        <div class="glass-card upload-section">
+            <h2 style="margin-bottom: 30px; font-size: 1.8rem;">Connect Your Data</h2>
+            
+            <!-- Data source selection tabs -->
+            <div class="data-source-tabs">
+                <div class="data-source-tab active" data-source="upload">📁 Upload Files</div>
+                <div class="data-source-tab" data-source="database">🗄️ Database</div>
+                <div class="data-source-tab" data-source="s3">☁️ Cloud Storage</div>
+                <div class="data-source-tab" data-source="file">📊 Large Files</div>
+                <div class="data-source-tab" data-source="url">🌐 API/URL</div>
+            </div>
+
+            <!-- Upload form -->
+            <div class="connection-form active" id="upload-form">
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-icon">📁</div>
+                    <h3>Drop CSV files here or click to browse</h3>
+                    <p>Multiple files will be automatically linked</p>
+                    <input type="file" id="fileInput" class="file-input" multiple accept=".csv" style="display: none;">
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
+
+            <!-- Database connection form -->
+            <div class="connection-form" id="database-form">
+                <div class="form-group">
+                    <label>Connection String</label>
+                    <input type="text" id="dbConnection" placeholder="postgresql://user:pass@host:5432/db">
+                </div>
+                <div class="form-group">
+                    <label>Query</label>
+                    <textarea id="dbQuery" rows="3" placeholder="SELECT * FROM transactions WHERE created_at > NOW() - INTERVAL '30 days'"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Chunk Size</label>
+                    <input type="number" id="dbChunkSize" value="10000" placeholder="10000">
+                </div>
+                <div class="form-group">
+                    <label>Max Rows (Optional)</label>
+                    <input type="number" id="dbMaxRows" placeholder="1000000">
+                </div>
+            </div>
+
+            <!-- S3 connection form -->
+            <div class="connection-form" id="s3-form">
+                <div class="form-group">
+                    <label>S3 Bucket</label>
+                    <input type="text" id="s3Bucket" placeholder="my-data-bucket">
+                </div>
+                <div class="form-group">
+                    <label>Key Prefix</label>
+                    <input type="text" id="s3KeyPrefix" placeholder="data/transactions/">
+                </div>
+                <div class="form-group">
+                    <label>Chunk Size</label>
+                    <input type="number" id="s3ChunkSize" value="10000">
+                </div>
+                <div class="form-group">
+                    <label>Max Rows (Optional)</label>
+                    <input type="number" id="s3MaxRows" placeholder="1000000">
+                </div>
+            </div>
+
+            <!-- Large file form -->
+            <div class="connection-form" id="file-form">
+                <div class="form-group">
+                    <label>File Path</label>
+                    <input type="text" id="filePath" placeholder="/path/to/large_dataset.csv">
+                </div>
+                <div class="form-group">
+                    <label>Chunk Size</label>
+                    <input type="number" id="fileChunkSize" value="10000">
+                </div>
+                <div class="form-group">
+                    <label>Max Rows (Optional)</label>
+                    <input type="number" id="fileMaxRows" placeholder="1000000">
+                </div>
+            </div>
+
+            <!-- URL form -->
+            <div class="connection-form" id="url-form">
+                <div class="form-group">
+                    <label>URL</label>
+                    <input type="text" id="urlPath" placeholder="https://api.company.com/data/export.csv">
+                </div>
+                <div class="form-group">
+                    <label>Chunk Size</label>
+                    <input type="number" id="urlChunkSize" value="5000">
+                </div>
+                <div class="form-group">
+                    <label>Max Rows (Optional)</label>
+                    <input type="number" id="urlMaxRows" placeholder="500000">
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="btn" id="connectBtn">🔗 Connect Data</button>
+                <button class="btn" id="analyzeBtn" disabled>🔍 Analyze Structure</button>
+                <button class="btn" id="fraudBtn" disabled>🛡️ Detect Fraud</button>
+                <button class="btn" id="churnBtn" disabled>📉 Predict Churn</button>
+                <button class="btn" id="insightsBtn" disabled>🧠 Full AI Insights</button>
+            </div>
+        </div>
+
+        <div class="glass-card" id="statusSection" style="display: none;">
+            <h3>Connection Status</h3>
+            <div id="statusContent"></div>
+        </div>
+
+        <div class="glass-card" id="resultsSection" style="display: none;">
+            <div class="summary-cards" id="summaryCards">
+                <!-- Summary cards will be populated by JavaScript -->
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-tab="overview">📊 Overview</div>
+                <div class="tab" data-tab="fraud">🛡️ Fraud Detection</div>
+                <div class="tab" data-tab="churn">📉 Churn Prediction</div>
+                <div class="tab" data-tab="graph">🕸️ Network Graph</div>
+            </div>
+
+            <div class="tab-content active" id="overview">
+                <h3 style="margin-bottom: 20px;">Data Intelligence Summary</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div>
+                        <h4 style="margin-bottom: 15px;">Graph Statistics</h4>
+                        <div id="graphStats"></div>
+                    </div>
+                    <div>
+                        <h4 style="margin-bottom: 15px;">Risk Distribution</h4>
+                        <div class="chart-container">
+                            <canvas id="riskChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content" id="fraud">
+                <h3 style="margin-bottom: 20px;">AI Fraud Detection Results</h3>
+                <div class="chart-container">
+                    <canvas id="fraudChart"></canvas>
+                </div>
+                <table class="predictions-table" id="fraudTable">
+                    <thead>
+                        <tr>
+                            <th>Entity ID</th>
+                            <th>Risk Score</th>
+                            <th>Risk Level</th>
+                            <th>Confidence</th>
+                            <th>AI Explanation</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="tab-content" id="churn">
+                <h3 style="margin-bottom: 20px;">Customer Churn Prediction</h3>
+                <div class="chart-container">
+                    <canvas id="churnChart"></canvas>
+                </div>
+                <table class="predictions-table" id="churnTable">
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Churn Risk</th>
+                            <th>Risk Level</th>
+                            <th>Confidence</th>
+                            <th>Key Factors</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="tab-content" id="graph">
+                <h3 style="margin-bottom: 20px;">Interactive Network Graph</h3>
+                <p style="margin-bottom: 20px; opacity: 0.8;">Explore relationships between customers, orders, and other entities in your data.</p>
+                <div class="graph-container" id="graphContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let uploadedFiles = [];
+        let currentData = null;
+        let currentDataSource = 'upload';
+        let cy = null;
+
+        // DOM elements
+        const uploadZone = document.getElementById('uploadZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const connectBtn = document.getElementById('connectBtn');
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const fraudBtn = document.getElementById('fraudBtn');
+        const churnBtn = document.getElementById('churnBtn');
+        const insightsBtn = document.getElementById('insightsBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const statusSection = document.getElementById('statusSection');
+
+        // Data source tab handling
+        document.querySelectorAll('.data-source-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update active tab
+                document.querySelectorAll('.data-source-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                
+                // Update active form
+                document.querySelectorAll('.connection-form').forEach(form => form.classList.remove('active'));
+                const targetForm = document.getElementById(`${tab.dataset.source}-form`);
+                if (targetForm) targetForm.classList.add('active');
+                
+                currentDataSource = tab.dataset.source;
+                updateButtons();
+            });
+        });
+
+        // File upload handlers (existing code)
+        uploadZone.addEventListener('click', () => fileInput.click());
+        uploadZone.addEventListener('dragover', handleDragOver);
+        uploadZone.addEventListener('drop', handleDrop);
+        fileInput.addEventListener('change', handleFileSelect);
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadZone.classList.add('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadZone.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(file => file.name.endsWith('.csv'));
+            addFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = Array.from(e.target.files);
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            files.forEach(file => {
+                if (!uploadedFiles.find(f => f.name === file.name)) {
+                    uploadedFiles.push(file);
+                }
+            });
+            updateFileList();
+            updateButtons();
+        }
+
+        function removeFile(fileName) {
+            uploadedFiles = uploadedFiles.filter(f => f.name !== fileName);
+            updateFileList();
+            updateButtons();
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = uploadedFiles.map(file => `
+                <div class="file-item">
+                    <span>📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)</span>
+                    <button class="remove-file" onclick="removeFile('${file.name}')">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        function updateButtons() {
+            const hasData = currentDataSource === 'upload' ? uploadedFiles.length > 0 : true;
+            connectBtn.disabled = false;
+            analyzeBtn.disabled = !hasData;
+            fraudBtn.disabled = !hasData;
+            churnBtn.disabled = !hasData;
+            insightsBtn.disabled = !hasData;
+        }
+
+        // Connection handling
+        connectBtn.addEventListener('click', connectToDataSource);
+        analyzeBtn.addEventListener('click', () => analyzeData('convert-to-graph'));
+        fraudBtn.addEventListener('click', () => analyzeData('predict-fraud'));
+        churnBtn.addEventListener('click', () => analyzeData('predict-churn'));
+        insightsBtn.addEventListener('click', () => analyzeData('gnn-insights'));
+
+        async function connectToDataSource() {
+            if (currentDataSource === 'upload') {
+                if (uploadedFiles.length === 0) {
+                    alert('Please select files to upload first.');
+                    return;
+                }
+                showStatus('Files ready for analysis', 'ready');
+                return;
+            }
+
+            showStatus('Connecting to data source...', 'processing');
+            
+            try {
+                let endpoint = '';
+                let requestData = {};
+
+                switch (currentDataSource) {
+                    case 'database':
+                        endpoint = 'connect-database';
+                        requestData = {
+                            connection_string: document.getElementById('dbConnection').value,
+                            query: document.getElementById('dbQuery').value,
+                            chunk_size: parseInt(document.getElementById('dbChunkSize').value) || 10000,
+                            max_rows: parseInt(document.getElementById('dbMaxRows').value) || null
+                        };
+                        break;
+                    
+                    case 's3':
+                        endpoint = 'connect-s3';
+                        requestData = {
+                            bucket: document.getElementById('s3Bucket').value,
+                            key_prefix: document.getElementById('s3KeyPrefix').value,
+                            chunk_size: parseInt(document.getElementById('s3ChunkSize').value) || 10000,
+                            max_rows: parseInt(document.getElementById('s3MaxRows').value) || null
+                        };
+                        break;
+                    
+                    case 'file':
+                        endpoint = 'connect-large-file';
+                        requestData = {
+                            file_path: document.getElementById('filePath').value,
+                            chunk_size: parseInt(document.getElementById('fileChunkSize').value) || 10000,
+                            max_rows: parseInt(document.getElementById('fileMaxRows').value) || null
+                        };
+                        break;
+                    
+                    case 'url':
+                        endpoint = 'connect-url';
+                        requestData = {
+                            url: document.getElementById('urlPath').value,
+                            chunk_size: parseInt(document.getElementById('urlChunkSize').value) || 5000,
+                            max_rows: parseInt(document.getElementById('urlMaxRows').value) || null
+                        };
+                        break;
+                }
+
+                const response = await fetch(`http://127.0.0.1:8000/${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    showStatus(`Connected successfully! Processed ${data.processing_summary?.total_rows_processed || 'unknown'} rows.`, 'ready');
+                    currentData = data;
+                } else {
+                    showStatus(`Connection failed: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                showStatus(`Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            statusSection.style.display = 'block';
+            const statusContent = document.getElementById('statusContent');
+            
+            const statusClass = type === 'ready' ? 'status-ready' : 
+                              type === 'processing' ? 'status-processing' : 'status-error';
+            
+            statusContent.innerHTML = `
+                <div class="status-indicator ${statusClass}">
+                    <span>${type === 'ready' ? '✅' : type === 'processing' ? '⏳' : '❌'}</span>
+                    ${message}
+                </div>
+            `;
+        }
+
+        // Analysis functions (enhanced)
+        async function analyzeData(endpoint) {
+            showLoading();
+            
+            try {
+                let response;
+                
+                if (currentDataSource === 'upload') {
+                    // Use existing file upload method
+                    const formData = new FormData();
+                    uploadedFiles.forEach(file => {
+                        formData.append('files', file);
+                    });
+
+                    response = await fetch(`http://127.0.0.1:8000/${endpoint}`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                } else {
+                    // Use scalable endpoint
+                    const scalableEndpoint = endpoint === 'predict-fraud' ? 'predict-fraud-scalable' : endpoint;
+                    
+                    response = await fetch(`http://127.0.0.1:8000/${scalableEndpoint}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(currentData || {})
+                    });
+                }
+
+                const data = await response.json();
+                
+                if (data.success || data.graph || data.insights) {
+                    currentData = data;
+                    displayResults(data, endpoint);
+                } else {
+                    showError(data.error || 'Analysis failed');
+                }
+            } catch (error) {
+                showError(`Analysis error: ${error.message}`);
+            }
+        }
+
+        function showLoading() {
+            resultsSection.style.display = 'block';
+            resultsSection.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <h3>🧠 AI is analyzing your data...</h3>
+                    <p>Training GraphSAGE models and generating insights</p>
+                </div>
+            `;
+        }
+
+        function showError(message) {
+            resultsSection.innerHTML = `
+                <div style="text-align: center; color: #ff6b6b; padding: 40px;">
+                    <h3>❌ Analysis Error</h3>
+                    <p>${message}</p>
+                    <button class="btn" onclick="location.reload()">Try Again</button>
+                </div>
+            `;
+        }
+
+        function displayResults(data, endpoint) {
+            // Reset results section with new structure
+            resultsSection.innerHTML = `
+                <div class="summary-cards" id="summaryCards"></div>
+                <div class="tabs">
+                    <div class="tab active" data-tab="overview">📊 Overview</div>
+                    <div class="tab" data-tab="fraud">🛡️ Fraud Detection</div>
+                    <div class="tab" data-tab="churn">📉 Churn Prediction</div>
+                    <div class="tab" data-tab="graph">🕸️ Network Graph</div>
+                </div>
+                <div class="tab-content active" id="overview">
+                    <h3 style="margin-bottom: 20px;">Data Intelligence Summary</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                        <div>
+                            <h4 style="margin-bottom: 15px;">Graph Statistics</h4>
+                            <div id="graphStats"></div>
+                        </div>
+                        <div>
+                            <h4 style="margin-bottom: 15px;">Risk Distribution</h4>
+                            <div class="chart-container">
+                                <canvas id="riskChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-content" id="fraud">
+                    <h3 style="margin-bottom: 20px;">AI Fraud Detection Results</h3>
+                    <div class="chart-container">
+                        <canvas id="fraudChart"></canvas>
+                    </div>
+                    <table class="predictions-table" id="fraudTable">
+                        <thead>
+                            <tr>
+                                <th>Entity ID</th>
+                                <th>Risk Score</th>
+                                <th>Risk Level</th>
+                                <th>Confidence</th>
+                                <th>AI Explanation</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="tab-content" id="churn">
+                    <h3 style="margin-bottom: 20px;">Customer Churn Prediction</h3>
+                    <div class="chart-container">
+                        <canvas id="churnChart"></canvas>
+                    </div>
+                    <table class="predictions-table" id="churnTable">
+                        <thead>
+                            <tr>
+                                <th>Customer ID</th>
+                                <th>Churn Risk</th>
+                                <th>Risk Level</th>
+                                <th>Confidence</th>
+                                <th>Key Factors</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="tab-content" id="graph">
+                    <h3 style="margin-bottom: 20px;">Interactive Network Graph</h3>
+                    <p style="margin-bottom: 20px; opacity: 0.8;">Explore relationships between customers, orders, and other entities in your data.</p>
+                    <div class="graph-container" id="graphContainer"></div>
+                </div>
+            `;
+
+            // Show summary cards
+            createSummaryCards(data);
+            
+            // Handle different endpoint responses
+            if (endpoint === 'gnn-insights' && data.insights) {
+                displayInsights(data.insights);
+            } else if (endpoint === 'predict-fraud' && data.predictions) {
+                displayFraudResults(data);
+            } else if (endpoint === 'predict-churn' && data.predictions) {
+                displayChurnResults(data);
+            } else if (data.graph) {
+                displayGraphResults(data.graph);
+            }
+
+            // Setup tab navigation
+            setupTabs();
+        }
+
+        function createSummaryCards(data) {
+            const summaryCards = document.getElementById('summaryCards');
+            let cards = '';
+
+            if (data.insights) {
+                const insights = data.insights;
+                cards += `
+                    <div class="summary-card">
+                        <div class="card-value">${insights.graph_statistics.total_nodes}</div>
+                        <div class="card-label">🎯 Total Entities</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-value">${insights.fraud_analysis.summary.high_risk_count}</div>
+                        <div class="card-label">🛡️ High Risk Fraud</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-value">${insights.churn_analysis.summary.high_churn_count}</div>
+                        <div class="card-label">📉 High Churn Risk</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="card-value">${insights.graph_statistics.total_edges}</div>
+                        <div class="card-label">🔗 Relationships</div>
+                    </div>
+                `;
+            } else if (data.summary || data.processing_summary) {
+                const summary = data.summary || data.processing_summary;
+                cards += `
+                    <div class="summary-card">
+                        <div class="card-value">${summary.total_nodes || summary.total_rows_processed || data.total_nodes || 0}</div>
+                        <div class="card-label">📊 Entities Analyzed</div>
+                    </div>
+                `;
+                
+                if (data.task === 'fraud_detection') {
+                    cards += `
+                        <div class="summary-card">
+                            <div class="card-value">${summary.high_risk_nodes || 0}</div>
+                            <div class="card-label">🛡️ High Risk</div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="card-value">${(summary.average_fraud_score * 100).toFixed(1)}%</div>
+                            <div class="card-label">📈 Avg Risk Score</div>
+                        </div>
+                    `;
+                }
+            }
+
+            summaryCards.innerHTML = cards;
+        }
+
+        function displayInsights(insights) {
+            // Update graph stats
+            const graphStats = document.getElementById('graphStats');
+            graphStats.innerHTML = `
+                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;">
+                    <p style="margin: 10px 0;"><strong>🎯 Nodes:</strong> ${insights.graph_statistics.total_nodes}</p>
+                    <p style="margin: 10px 0;"><strong>🔗 Edges:</strong> ${insights.graph_statistics.total_edges}</p>
+                    <p style="margin: 10px 0;"><strong>🧩 Components:</strong> ${insights.graph_statistics.number_of_components}</p>
+                    <p style="margin: 10px 0;"><strong>🌐 Connected:</strong> ${insights.graph_statistics.is_connected ? 'Yes' : 'No'}</p>
+                    <p style="margin: 10px 0;"><strong>🤖 Model:</strong> GraphSAGE</p>
+                </div>
+            `;
+
+            // Display fraud predictions
+            displayPredictionTable('fraudTable', insights.fraud_analysis.predictions.filter(p => p.node_type === 'entity'));
+            
+            // Display churn predictions
+            displayPredictionTable('churnTable', insights.churn_analysis.predictions.filter(p => p.node_type === 'customer'));
+
+            // Create charts
+            createRiskChart(insights);
+            createFraudChart(insights.fraud_analysis);
+            createChurnChart(insights.churn_analysis);
+            
+            // Create graph visualization
+            createGraphVisualization(insights);
+        }
+
+        function displayFraudResults(data) {
+            displayPredictionTable('fraudTable', data.predictions.filter(p => p.node_type === 'entity'));
+            createFraudChart(data);
+        }
+
+        function displayChurnResults(data) {
+            displayPredictionTable('churnTable', data.predictions.filter(p => p.node_type === 'customer'));
+            createChurnChart(data);
+        }
+
+        function displayGraphResults(graph) {
+            const graphStats = document.getElementById('graphStats');
+            graphStats.innerHTML = `
+                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 15px;">
+                    <p style="margin: 10px 0;"><strong>🎯 Nodes:</strong> ${graph.statistics.total_nodes}</p>
+                    <p style="margin: 10px 0;"><strong>🔗 Edges:</strong> ${graph.statistics.total_edges}</p>
+                    <p style="margin: 10px 0;"><strong>📊 Node Types:</strong> ${graph.node_types.join(', ')}</p>
+                    <p style="margin: 10px 0;"><strong>🔗 Edge Types:</strong> ${graph.edge_types.join(', ')}</p>
+                </div>
+            `;
+            
+            createGraphVisualization({graph_statistics: graph.statistics, nodes: graph.nodes, edges: graph.edges});
+        }
+
+        function displayPredictionTable(tableId, predictions) {
+            const table = document.getElementById(tableId);
+            const tbody = table.querySelector('tbody');
+            
+            tbody.innerHTML = predictions.slice(0, 10).map(pred => `
+                <tr>
+                    <td>${pred.node_id.split('_').pop()}</td>
+                    <td>${(pred.prediction * 100).toFixed(1)}%</td>
+                    <td><span class="risk-badge risk-${pred.risk_level.toLowerCase()}">${pred.risk_level}</span></td>
+                    <td>${(pred.confidence * 100).toFixed(1)}%</td>
+                    <td>${pred.explanation.factors.join(', ')}</td>
+                </tr>
+            `).join('');
+        }
+
+        function createRiskChart(insights) {
+            const ctx = document.getElementById('riskChart');
+            if (!ctx) return;
+            
+            // Count risk levels across both fraud and churn
+            const riskCounts = { 'HIGH': 0, 'MEDIUM': 0, 'LOW': 0 };
+
+            [...insights.fraud_analysis.predictions, ...insights.churn_analysis.predictions].forEach(pred => {
+                riskCounts[pred.risk_level]++;
+            });
+
+            new Chart(ctx.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                    datasets: [{
+                        data: [riskCounts.HIGH, riskCounts.MEDIUM, riskCounts.LOW],
+                        backgroundColor: ['#ff6b6b', '#ffa726', '#66bb6a'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: 'white' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function createFraudChart(fraudData) {
+            const ctx = document.getElementById('fraudChart');
+            if (!ctx) return;
+
+            const fraudPredictions = fraudData.predictions.filter(p => p.node_type === 'entity').slice(0, 10);
+            
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: fraudPredictions.map(p => p.node_id.split('_').pop()),
+                    datasets: [{
+                        label: 'Fraud Risk Score',
+                        data: fraudPredictions.map(p => p.prediction * 100),
+                        backgroundColor: fraudPredictions.map(p => 
+                            p.risk_level === 'HIGH' ? '#ff6b6b' : 
+                            p.risk_level === 'MEDIUM' ? '#ffa726' : '#66bb6a'
+                        ),
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: 'white' },
+                            title: { display: true, text: 'Risk Score (%)', color: 'white' }
+                        },
+                        x: { ticks: { color: 'white' } }
+                    }
+                }
+            });
+        }
+
+        function createChurnChart(churnData) {
+            const ctx = document.getElementById('churnChart');
+            if (!ctx) return;
+
+            const churnPredictions = churnData.predictions.filter(p => p.node_type === 'customer').slice(0, 10);
+            
+            new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: churnPredictions.map(p => p.node_id.split('_').pop()),
+                    datasets: [{
+                        label: 'Churn Risk Score',
+                        data: churnPredictions.map(p => p.prediction * 100),
+                        backgroundColor: churnPredictions.map(p => 
+                            p.risk_level === 'HIGH' ? '#ff6b6b' : 
+                            p.risk_level === 'MEDIUM' ? '#ffa726' : '#66bb6a'
+                        ),
+                        borderRadius: 8,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: 'white' } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: 'white' },
+                            title: { display: true, text: 'Churn Risk (%)', color: 'white' }
+                        },
+                        x: { ticks: { color: 'white' } }
+                    }
+                }
+            });
+        }
+
+        function createGraphVisualization(data) {
+            const container = document.getElementById('graphContainer');
+            if (!container || !data.nodes) return;
+
+            // Prepare nodes and edges for Cytoscape
+            const elements = [];
+            
+            // Add nodes
+            if (data.nodes) {
+                data.nodes.forEach(node => {
+                    elements.push({
+                        data: {
+                            id: node.id,
+                            label: node.id.split('_').pop(),
+                            type: node.type
+                        }
+                    });
+                });
+            }
+
+            // Add edges
+            if (data.edges) {
+                data.edges.forEach((edge, index) => {
+                    elements.push({
+                        data: {
+                            id: `edge-${index}`,
+                            source: edge.source_id,
+                            target: edge.target_id,
+                            label: edge.edge_type
+                        }
+                    });
+                });
+            }
+
+            // Create Cytoscape graph
+            cy = cytoscape({
+                container: container,
+                elements: elements,
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'background-color': '#667eea',
+                            'label': 'data(label)',
+                            'width': 40,
+                            'height': 40,
+                            'font-size': '12px',
+                            'text-valign': 'center',
+                            'text-halign': 'center',
+                            'color': 'white',
+                            'text-outline-width': 2,
+                            'text-outline-color': '#000'
+                        }
+                    },
+                    {
+                        selector: 'node[type="customer"]',
+                        style: {
+                            'background-color': '#667eea',
+                            'shape': 'round-rectangle'
+                        }
+                    },
+                    {
+                        selector: 'node[type="entity"]',
+                        style: {
+                            'background-color': '#764ba2',
+                            'shape': 'ellipse'
+                        }
+                    },
+                    {
+                        selector: 'edge',
+                        style: {
+                            'width': 3,
+                            'line-color': 'rgba(255,255,255,0.3)',
+                            'target-arrow-color': 'rgba(255,255,255,0.3)',
+                            'target-arrow-shape': 'triangle',
+                            'curve-style': 'bezier',
+                            'font-size': '10px',
+                            'color': 'white',
+                            'text-outline-width': 1,
+                            'text-outline-color': '#000'
+                        }
+                    }
+                ],
+                layout: {
+                    name: 'cose',
+                    idealEdgeLength: 100,
+                    nodeOverlap: 20,
+                    refresh: 20,
+                    fit: true,
+                    padding: 30,
+                    randomize: false,
+                    componentSpacing: 100,
+                    nodeRepulsion: 400000,
+                    edgeElasticity: 100,
+                    nestingFactor: 5,
+                    gravity: 80,
+                    numIter: 1000,
+                    initialTemp: 200,
+                    coolingFactor: 0.95,
+                    minTemp: 1.0
+                }
+            });
+
+            // Add hover effects
+            cy.on('mouseover', 'node', function(evt) {
+                this.style('background-color', '#ffd700');
+            });
+
+            cy.on('mouseout', 'node', function(evt) {
+                this.style('background-color', this.data('type') === 'customer' ? '#667eea' : '#764ba2');
+            });
+        }
+
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active class from all tabs and contents
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(tc => tc.classList.remove('active'));
+
+                    // Add active class to clicked tab and corresponding content
+                    tab.classList.add('active');
+                    const targetTab = tab.getAttribute('data-tab');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+        }
+
+        // Initialize the application
+        updateButtons();
+    </script>
+</body>
+</html>

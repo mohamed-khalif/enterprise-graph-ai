@@ -1,0 +1,7 @@
+﻿customer_id,customer_name,email,signup_date,vip_status
+CUST-1001,John Smith,john.smith@email.com,2022-03-15,gold
+CUST-1002,Sarah Johnson,sarah.j@email.com,2023-07-22,silver
+CUST-1003,Mike Chen,mike.chen@email.com,2024-01-10,bronze
+CUST-1004,Emma Wilson,emma.w@email.com,2021-05-08,platinum
+CUST-1005,David Brown,david.brown@email.com,2023-02-14,silver
+CUST-1006,Lisa Garcia,lisa.garcia@email.com,2022-11-03,gold

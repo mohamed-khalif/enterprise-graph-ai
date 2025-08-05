@@ -1,0 +1,6 @@
+﻿rep_id,rep_name,territory,experience_years,deals_closed_q4,revenue_q4,calls_made,emails_sent,demos_given,avg_deal_size,win_rate,created_at
+REP-001,Sarah Chen,West Coast,5,8,450000,320,850,24,56250,0.32,2024-01-01 08:00:00
+REP-002,Mike Rodriguez,East Coast,3,12,600000,280,720,36,50000,0.43,2024-01-01 08:00:00
+REP-003,Lisa Thompson,Midwest,7,6,900000,180,450,18,150000,0.25,2024-01-01 08:00:00
+REP-004,David Park,South,2,15,375000,420,1100,45,25000,0.54,2024-01-01 08:00:00
+REP-005,Emma Wilson,International,4,10,750000,200,600,30,75000,0.38,2024-01-01 08:00:00

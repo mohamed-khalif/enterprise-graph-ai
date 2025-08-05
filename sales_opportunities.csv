@@ -1,0 +1,6 @@
+﻿opportunity_id,account_id,contact_id,rep_id,deal_size,stage,close_date,source,industry,contact_engagement_score,days_in_stage,demo_completed,proposal_sent,created_at
+OPP-2024-001,ACC-001,CONT-001,REP-005,75000,Proposal,2024-02-15,Inbound Lead,Technology,8.5,45,TRUE,TRUE,2024-01-01 09:00:00
+OPP-2024-002,ACC-002,CONT-002,REP-003,150000,Negotiation,2024-02-20,Cold Outreach,Finance,6.2,120,TRUE,TRUE,2023-12-15 14:30:00
+OPP-2024-003,ACC-003,CONT-003,REP-005,25000,Qualified,2024-03-01,Referral,Healthcare,9.1,15,FALSE,FALSE,2024-01-20 11:15:00
+OPP-2024-004,ACC-004,CONT-004,REP-001,300000,Discovery,2024-04-15,Trade Show,Manufacturing,4.3,90,FALSE,FALSE,2023-11-30 16:45:00
+OPP-2024-005,ACC-005,CONT-005,REP-002,50000,Closed-Won,2024-01-30,Partner,Technology,9.8,30,TRUE,TRUE,2023-12-01 10:00:00

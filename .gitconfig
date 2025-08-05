@@ -1,0 +1,2 @@
+[credential "https://git-codecommit.us-east-1.amazonaws.com"]
+	provider = generic

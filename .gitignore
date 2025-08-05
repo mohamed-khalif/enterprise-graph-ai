@@ -1,0 +1,8 @@
+﻿__pycache__/
+*.pyc
+.env
+.vscode/
+*_enterprise_500k.csv
+*_large_100k.csv
+*.tmp
+*.log
